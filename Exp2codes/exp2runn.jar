@@ -1,0 +1,41 @@
+private static boolean expr_2(){
+for (int x =1; x <=10; x++){ ScheduleSim sim = new ScheduleSim();
+Producer producer = new Producer("Opp");
+int stop = 250;
+IncrementingPattern pattern = new IncrementingPattern(start, stop)
+int taskCount = 60; int taskSize = 250;
+FlatPattern flat = new FlatPattern(taskCount, taskSize);
+int startSize = 20; int endSize = 250; double mu = 11; double sigma = 4;
+int combinedTargetSize = 5000;
+GaussianPattern gaus = new GaussianPattern(startSize,endSize,mu,sigma, combinedTargetSize); producer.addMetatask(1, flat);
+producer.addMetatask(10, gaus); producer.addMetatask(20,pattern); producer.addMetatask(30, flat); producer.addMetatask(40, pattern); producer.addMetatask(60, gaus);
+Architecture architecture = new Architecture("Min");
+Opportunistic broker = new Opportunistic(); MinminScheduler scheduler1 = new MinminScheduler(); MinminScheduler scheduler2 = new MinminScheduler();
+ArrayList<Consumer> consumers = new ArrayList<>();
+for (int i = 60; i > 10; i--) {//create consumers with minimum value of 10 and max 50
+consumers.add(new Consumer(i));//done this to ensure that every test will have the same values for the consumers
+//consumers.add(new Consumer(rand.nextInt(60-10)+10));
+}
+// Build Architecture Tree try {
+architecture.addEntity(producer, broker); architecture.addEntity(broker, scheduler1); architecture.addEntity(broker, scheduler2); int c =0;
+while(c < consumers.size()){//equally distribute consumers
+architecture.addEntity(scheduler1, consumers.get(c)); c++;
+architecture.addEntity(scheduler2, consumers.get(c)); c++;
+}
+} catch (BadParentException bpe) { System.out.println(bpe.getMessage()); System.out.println("Parent Id: " + bpe.getParent().getId()); System.out.println("Child Id: " + bpe.getChild().getId()); return false;
+}
+// Give experiment to ScheduleSim sim.addExperiment(architecture);
+// Chose output options
+OutputOptions outputOptions = new OutputOptions(); // default is makespan and utilisation outputOptions.setCountBins(x); // Display job makespans group on 10 bins of job size outputOptions.setRenderSchedule(true); // Render schedule images outputOptions.setMakespan(true);
+outputOptions.setUtilisation(true);
+// Run the experiment try {
+sim.runExperiments(outputOptions);
+} catch (BadStepsException bse) {
+Log.println(bse.getMessage() + " SimEntity id:" + bse.getSimEntity().getId());
+} catch (BadTaskCompletionException bjce) {
+Log.println(bjce.getMessage() + " Sent:" + bjce.getTasksSent() + " Completed:" + bjce.getTasksCompleted());
+}
+System.out.println("\n");
+}
+return true;
+}

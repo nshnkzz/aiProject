@@ -1,0 +1,20 @@
+private static boolean expr_3(){
+// Create simulator
+for (int x =1; x <=10; x++){ ScheduleSim sim = new ScheduleSim();
+Producer producer = new Producer("Opp");
+
+int start = 20; int stop = 250;
+IncrementingPattern pattern = new IncrementingPattern(start, stop);
+
+int taskCount = 60; int taskSize = 250;
+FlatPattern flat = new FlatPattern(taskCount, taskSize);
+
+int startSize = 20; int endSize = 250; double mu = 11; double sigma = 4;
+int combinedTargetSize = 5000;
+GaussianPattern gaus = new GaussianPattern(startSize,endSize,mu,sigma, combinedTargetSize); producer.addMetatask(1, flat);
+producer.addMetatask(10, gaus); producer.addMetatask(20,pattern); producer.addMetatask(30, flat); producer.addMetatask(40, pattern); producer.addMetatask(60, gaus);
+// Create Architecture
+Architecture architecture = new Architecture("Min_Min");
+// Create Scheduler
+Opportunistic broker = new Opportunistic(); MinminScheduler scheduler1 = new MinminScheduler(); MinminScheduler scheduler2 = new MinminScheduler();
+//MaxminFastTrackScheduler scheduler3 = new MaxminFastTrackScheduler();

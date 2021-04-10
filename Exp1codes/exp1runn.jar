@@ -1,0 +1,41 @@
+private static boolean expr_1() {
+// Create simulation
+// expr 1
+for (int i =1; i <=10; i++){
+ScheduleSim sim = new ScheduleSim();
+// Create Job Pattern(s), this will create the wave of jobs. There several int taskCount = 20;
+int taskSize = 16;
+FlatPattern flat = new FlatPattern(taskCount, taskSize);
+int startSize = 20; int endSize = 150; double mu = 11; double sigma = 4;
+int combinedTargetSize = 5000;
+GaussianPattern gaus = new GaussianPattern(startSize,endSize,mu,sigma, combinedTargetSize);
+//incrementing pattern int start = 20;
+int end = 150;
+IncrementingPattern incrementing = new IncrementingPattern(start,end);
+producer.addMetatask(1,gaus); producer.addMetatask(10,gaus); producer.addMetatask(20, incrementing);
+// Create Architecture
+Architecture architecture = new Architecture("Min_Min");
+
+// Create Scheduler(s)
+Opportunistic robinTopScheduler = new Opportunistic(); MinminScheduler robinSubOneScheduler = new MinminScheduler(); MinminScheduler robinSubTwoScheduler = new MinminScheduler();
+Consumer[] consumers = new Consumer[10];
+consumers[0] = new Consumer(10); // A consumer with a speed of 10 units per step consumers[1] = new Consumer(30);
+consumers[2] = new Consumer(10); consumers[3] = new Consumer(10); consumers[4] = new Consumer(10); consumers[5] = new Consumer(10); consumers[6] = new Consumer(10); consumers[7] = new Consumer(30); consumers[8] = new Consumer(10); consumers[9] = new Consumer(10);
+// Build Architecture Tree try {// Build up tree
+// producer > robinTopScheduler |> robinSubOneScheduler |> consumers[0]
+//	|	|> consumers[1]//	|//	|> robinSubTwoScheduler |> consumers[2]//	|> consumers[3]
+//	|> consumers[4]//	|> consumers[5]//	|> consumers[6]//	|> consumers[7]//	|> consumers[8]//	|> consumers[9]
+architecture.addEntity(producer, robinTopScheduler);
+architecture.addEntity(robinTopScheduler, robinSubOneScheduler); architecture.addEntity(robinTopScheduler, robinSubTwoScheduler); architecture.addEntity(robinSubOneScheduler, consumers[0]); architecture.addEntity(robinSubOneScheduler, consumers[1]); architecture.addEntity(robinSubTwoScheduler, consumers[2]); architecture.addEntity(robinSubTwoScheduler, consumers[3]); architecture.addEntity(robinSubTwoScheduler, consumers[4]); architecture.addEntity(robinSubTwoScheduler, consumers[5]); architecture.addEntity(robinSubTwoScheduler, consumers[6]); architecture.addEntity(robinSubTwoScheduler, consumers[7]); architecture.addEntity(robinSubTwoScheduler, consumers[8]); architecture.addEntity(robinSubTwoScheduler, consumers[9]);
+} catch (BadParentException bpe) { Log.println(bpe.getMessage());
+Log.println("Parent Id: " + bpe.getParent().getId()); Log.println("Child Id: " + bpe.getChild().getId());}
+sim.addExperiment(architecture);
+OutputOptions outputOptions = new OutputOptions(); // default is makespan and utilisation outputOptions.setCountBins(i); // Display job makespans group on 10 bins of job size outputOptions.setRenderSchedule(true); // Render schedule images outputOptions.setMakespan(true);
+outputOptions.setUtilisation(true);
+sim.runExperiments(outputOptions);
+} catch (BadStepsException bse) {
+Log.println(bse.getMessage() + " SimEntity id:" + bse.getSimEntity().getId());
+} catch (BadTaskCompletionException bjce) {
+Log.println(bjce.getMessage() + " Sent:" + bjce.getTasksSent() + " Completed:" + bjce.getTasksCompleted());}
+System.out.println("\n");
+}//for return true;}
